@@ -76,8 +76,6 @@
                     <th>Mittwoch</th>
                     <th>Donnerstag</th>
                     <th>Freitag</th>
-                    <th>Samstag</th>
-                    <th>Sonntag</th>
                 </tr>
             </thead>
             <tbody id="calendarBody"></tbody>
@@ -94,7 +92,7 @@
 
     <script>
         function generateTimeSlots() {
-            const startTime = moment().startOf('day').add(8, 'hours');
+            const startTime = moment().startOf('day').add(12, 'hours');
             const endTime = moment().startOf('day').add(20, 'hours');
             const calendarBody = document.getElementById('calendarBody');
 
@@ -104,7 +102,7 @@
                 timeCell.textContent = startTime.format('HH:mm');
                 row.appendChild(timeCell);
 
-                for (let i = 0; i < 7; i++) {
+                for (let i = 0; i < 5; i++) {
                     const cell = document.createElement('td');
                     cell.classList.add('time-slot');
                     cell.dataset.time = startTime.format('HH:mm');
