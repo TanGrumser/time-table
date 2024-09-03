@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flötenunterricht Kalender</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .time-slot {
+            cursor: pointer;
+        }
+        .selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input, button {
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flötenunterricht Kalender</h1>
+        <table id="calendar">
+            <thead>
+                <tr>
+                    <th>Zeit</th>
+                    <th>Montag</th>
+                    <th>Dienstag</th>
+                    <th>Mittwoch</th>
+                    <th>Donnerstag</th>
+                    <th>Freitag</th>
+                    <th>Samstag</th>
+                    <th>Sonntag</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody"></tbody>
+        </table>
+
+        <h2>Deine Auswahl senden</h2>
+        <form id="lessonForm" action="https://formspree.io/f/xqazjpwr" method="POST">
+            <input type="text" name="name" placeholder="Dein Name" required>
+            <input type="email" name="email" placeholder="Deine E-Mail" required>
+            <input type="hidden" name="selectedSlots" id="selectedSlots">
+            <button type="submit">Auswahl senden</button>
+        </form>
+    </div>
+
+    <script>
+        function generateTimeSlots() {
+            const startTime = moment().startOf('day').add(8, 'hours');
+            const endTime = moment().startOf('day').add(20, 'hours');
+            const calendarBody = document.getElementById('calendarBody');
+
+            while (startTime.isBefore(endTime)) {
+                const row = document.createElement('tr');
+                const timeCell = document.createElement('td');
+                timeCell.textContent = startTime.format('HH:mm');
+                row.appendChild(timeCell);
+
+                for (let i = 0; i < 7; i++) {
+                    const cell = document.createElement('td');
+                    cell.classList.add('time-slot');
+                    cell.dataset.time = startTime.format('HH:mm');
+                    cell.dataset.day = i;
+                    cell.addEventListener('click', toggleTimeSlot);
+                    row.appendChild(cell);
+                }
+
+                calendarBody.appendChild(row);
+                startTime.add(15, 'minutes');
+            }
+        }
+
+        function toggleTimeSlot(event) {
+            const cell = event.target;
+            cell.classList.toggle('selected');
+        }
+
+        function getSelectedSlots() {
+            const selectedSlots = document.querySelectorAll('.time-slot.selected');
+            const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+            return Array.from(selectedSlots).map(slot => `${days[slot.dataset.day]} ${slot.dataset.time}`).join(', ');
+        }
+
+        document.getElementById('lessonForm').addEventListener('submit', function(e) {
+            document.getElementById('selectedSlots').value = getSelectedSlots();
+        });
+
+        generateTimeSlots();
+    </script>
+</body>
+</html>
