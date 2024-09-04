@@ -63,11 +63,37 @@
         button:hover {
             background-color: #45a049;
         }
+        .blocked {
+            background-color: #d2d2d2;
+            cursor: auto;
+        }
+        .tiny {
+            font-size: 14px;
+            padding: 0;
+            margin: 2px;
+            color: rgb(97, 97, 97);
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Flötenunterricht Kalender</h1>
+        <h1>Kalender Querflötenunterricht<br>Clara Steidlinger</h1>
+        <p>
+            Bitte <b>ALLE</b> möglichen freien Zeiten auswählen. Am besten so viele Termine an so vielen verschiedenen Tagen wie möglich angeben, damit wir eine passende Unterrichtszeit finden können.
+            <br>
+            <br>
+            <b>Beispiel:</b> Wer montags von 14:00 bis 17:00 Uhr Zeit hat, färbt alle Felder von 14:00 bis 17:00 Uhr grün. Das Gleiche dann auch für die verbleibenden Tage.
+            <br>
+            <br>
+            <b>Danke!</b>
+            </span>
+        </p>
         <table id="calendar">
             <thead>
                 <tr>
@@ -75,7 +101,7 @@
                     <th>Montag</th>
                     <th>Dienstag</th>
                     <th>Mittwoch</th>
-                    <th>Donnerstag</th>
+                    <th>Donnerstag<br><p class="tiny">(Waldbronn)</p></th>
                     <th>Freitag</th>
                 </tr>
             </thead>
@@ -90,8 +116,33 @@
             <button type="submit">Auswahl senden</button>
         </form>
     </div>
+    <p class="footer">
+        Made with ❤️ by Tan Grumser
+    </p>
 
     <script>
+        // donnerstag ist ganzenm tag waldbronn
+        const blockedTimes = [
+            [], // blocked times on monday
+            [], // blocked times on tuesday
+            [], // blocked times on wednesday
+            [], // blocked times on thursday
+            [], // blocked times on friday
+            // example:
+            // [{ start: '13:30', end: '14:30' }]
+        ];
+
+        function isBlocked(day, time) {
+            const dayBlockedTimes = blockedTimes[day];
+            return dayBlockedTimes.some(blockedTime => {
+                const start = moment(blockedTime.start, 'HH:mm');
+                const end = moment(blockedTime.end, 'HH:mm');
+                // subtract epsilon to make sure the start time is included
+                start.subtract(1, 'second');
+                return time.isBetween(start, end);
+            });
+        }
+
         function generateTimeSlots() {
             const startTime = moment().startOf('day').add(12, 'hours');
             const endTime = moment().startOf('day').add(20, 'hours');
@@ -100,7 +151,10 @@
             while (startTime.isBefore(endTime)) {
                 const row = document.createElement('tr');
                 const timeCell = document.createElement('td');
-                timeCell.textContent = startTime.format('HH:mm');
+                const endTime = startTime.clone().add(15, 'minutes');
+                timeCell.textContent = `${startTime.format('HH:mm')} - ${endTime.format('HH:mm')}`;
+
+
                 row.appendChild(timeCell);
 
                 for (let i = 0; i < 5; i++) {
@@ -108,7 +162,13 @@
                     cell.classList.add('time-slot');
                     cell.dataset.time = startTime.format('HH:mm');
                     cell.dataset.day = i;
-                    cell.addEventListener('click', toggleTimeSlot);
+
+                    if (isBlocked(i, startTime)) {
+                        cell.classList.add('blocked');
+                    } else {
+                        cell.addEventListener('click', toggleTimeSlot);
+                    }
+
                     row.appendChild(cell);
                 }
 
